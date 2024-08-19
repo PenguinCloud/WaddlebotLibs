@@ -1,9 +1,9 @@
-from libs.botClasses import *
+from botClasses import *
 from botConfig import botConfig as bc
 import inspect
 import os
 import requests
-from libs.botLogger import botLogger
+from botLogger import botLogger
 
 # Why is that black van out there?
 log = botLogger("waddlebot-dbc")
@@ -27,7 +27,7 @@ class botDb:
             log.debug("No dbinfo object given, trying to find config file based on default")
             call_abspath = os.path.abspath((inspect.stack()[0])[1])
             path = f"{os.path.dirname(call_abspath)}{DEFAULT_CFG_FILENAME}"
-            self.dbc = bc(configPath=path).config["database"]
+            self.dbc = bc(configPath = path).config["database"]
         # set the below to whatever request auth method you want before calling dbConnect functions
         self.auth = None
 
@@ -46,7 +46,7 @@ class botDb:
         requrl = f"https://{self.db.webhost}:{self.db.webport}/{self.db.database}/{self.db.table}/read"
         reqquery = {'columns': ','.join(query.columns), 'queryColumn': query.queryColumn, 'queryValue': query.queryValue}
         try:
-            response = requests.get(requrl, data=reqquery, auth=self.auth)
+            response = requests.get(requrl, data = reqquery, auth = self.auth)
             response.raise_for_status()
             return response.json()
         except requests.RequestException as err:
@@ -60,8 +60,11 @@ class botDb:
     # Function which calls out to a DB via API to update DB records
     # ---------------------
     def webdbUpdate(self, query: dbquery):
-        requrl = f"https://{self.db.webhost}:{self.db.webport}/{self.db.database}/{self.db.table}/update"
-        reqquery = {'columns': ','.join(query.columns), 'queryColumn': query.queryColumn, 'queryValue': query.queryValue}
+        # I split this up to make it easier to debug and for PEP8 compliance
+        webDBurl = f"https://{self.db.webhost}:{self.db.webport}/{self.db.database}"
+        requrl = f"{webDBurl}/{self.db.table}/update"
+        reqquery = {'columns': ','.join(query.columns), 'queryColumn': query.queryColumn, 
+                    'queryValue': query.queryValue}
         log.debug(f"Requesting update to {requrl}")
         try:
             response = requests.get(requrl, data=reqquery)
