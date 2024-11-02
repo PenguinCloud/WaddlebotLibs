@@ -1,5 +1,4 @@
 import logging
-import inspect
 
 # Usage Example: 
 # mylog = botLogger.BotLogger()
@@ -13,18 +12,19 @@ class BotLogger:
     def __init__(self, logname: str = "WaddleBot"):
         self.logger = logging.getLogger(logname)
         self.logger.setLevel(logging.INFO)
-        self.callFunction = None
+        self.callFunction = self.caller()
     
     # ---------------------
     # This is a function which will set the handler name to the caller function
     # ---------------------
     def caller(self):
+        from inspect import stack
         try:
-            self.callFunction = inspect.stack()[2][3]
+            self.callFunction = stack()[2][3]
         except Exception:
             self.logger.debug("Unable to get the caller 2 levels up, tryin 1 level up!")
         if len(self.callFunction) < 2:
-            self.callFunction = inspect.stack()[1][3]
+            self.callFunction = stack()[1][3]
     
     # ---------------------
     # This is a function which will create a logger using file handler

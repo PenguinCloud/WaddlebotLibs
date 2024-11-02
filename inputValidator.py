@@ -11,6 +11,7 @@ log.fileLogger("validator.log")
 class inputValidator:
     def __init__(self):
         self.valid = False
+        log.info("Input Validator Initialized for %s", BotLogger.caller)
 
     def alphaNumeric(self, input: str):
         if match("^[a-zA-Z0-9]*$", input):
