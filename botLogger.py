@@ -1,6 +1,11 @@
 import logging
 import inspect
 
+# Usage Example: 
+# mylog = botLogger.BotLogger()
+# mylog.fileLogger("bot.log")
+# mylog.info("This is a test message")
+
 # ---------------------
 # This is a class which will handle all logging for the bot
 # ---------------------
@@ -44,8 +49,8 @@ class BotLogger:
     # ---------------------
     # This is a function which will create a logger using file handler with JSON format
     # ---------------------
-    def fileJSONLogger(self):
-        json_handler = logging.FileHandler('log.json')
+    def fileJSONLogger(self, file: str='log.json'):
+        json_handler = logging.FileHandler(file)
         json_handler.setLevel(logging.INFO)
         json_handler.setFormatter(
             logging.Formatter('{"function": "%(name)s", "level": "%(levelname)s", "rawMsg": "%(message)s"}'))
