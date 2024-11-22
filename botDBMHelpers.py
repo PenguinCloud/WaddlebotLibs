@@ -139,6 +139,23 @@ class dbm_helpers:
             (self.db.roles.community_id == community_id) & (self.db.roles.name == "Member")
         ).select(self.db.roles.id).first().id
 
+    # A helper function that uses the community and an identity to retrieve the identity's role in the community.
+    def get_identity_role_in_community(self, identity_name: str, community_name: str) -> role:
+        identity = self.db(self.db.identities.name == identity_name).select().first()
+        community = self.db(self.db.communities.community_name == community_name).select().first()
+        
+        if not identity or not community:
+            return None
+        
+        membership = self.db((self.db.community_members.identity_id == identity.id) &
+                        (self.db.community_members.community_id == community.id)).select().first()
+        
+        if not membership:
+            return None
+        
+        role = self.db(self.db.roles.id == membership.role_id).select().first()
+        return role
+
     # Helper function to set the role of all identities in a community to the default "Member" role when a role is deleted.
     # Only identities with the deleted role are affected.
     def set_default_role_for_identities_in_community(self, community_id: int, role_id: int):
