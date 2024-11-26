@@ -63,7 +63,7 @@ class matterbridge_helpers:
         return payloads
 
     # A helper function to send a message to Matterbridge with a given matterbridge payload. Returns a success message if the message is sent successfully.
-    def send_matterbridge_message(payload: matterbridgePayload) -> None:
+    def send_matterbridge_message(self, payload: matterbridgePayload) -> None:
         # Send the message to Matterbridge
         try:
             requests.post(matterbridgePostURL, json=asdict(payload))

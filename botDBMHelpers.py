@@ -31,7 +31,7 @@ class dbm_helpers:
         )
 
     # Function to decode names with space in
-    def decode_name(name: str) -> str:
+    def decode_name(self, name: str) -> str:
         if not name:
             return None
         name = name.replace("%20", " ")
@@ -40,7 +40,7 @@ class dbm_helpers:
         return unquote(name)
     
     #Function to replace the first character of a string with a hash if it is an underscore.
-    def replace_first_char(name: str) -> str:
+    def replace_first_char(self, name: str) -> str:
         if name[0] == "_":
             name = "#" + name[1:]
         return name
