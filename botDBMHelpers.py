@@ -9,7 +9,7 @@ from json import dump as jdump
 from requests import request
 
 # Import the necessary classes from the botclasses module
-from botClasses import role, community, alias_command, module, identity, routing_gateway, text_response
+from WaddlebotLibs.botClasses import role, community, alias_command, module, identity, routing_gateway, text_response
 
 # Class to initialize the helpers class
 class dbm_helpers:
