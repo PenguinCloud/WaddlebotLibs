@@ -55,3 +55,9 @@ class BotLogger:
         json_handler.setFormatter(
             logging.Formatter('{"function": "%(name)s", "level": "%(levelname)s", "rawMsg": "%(message)s"}'))
         self.logger.addHandler(json_handler)
+        
+    # ---------------------
+    # this is a functin which will change the logging level
+    # ---------------------
+    def changeLevel(self, level):
+        self.logger.setLevel(level)
