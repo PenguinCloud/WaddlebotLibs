@@ -67,9 +67,8 @@ class dbm_helpers:
     # Helper function to check if a given command exists in the modules table
     def command_exists(self, command: str) -> bool:
         command = self.replace_spaces(command)
-        # return self.db(self.db.modules.metadata.like(f'%"{command}"%')).select().first()
 
-        return self.db(self.db.modules.metadata.like(f'%"{command}"%')).count() > 0
+        return self.db(self.db.modules.command == command).select().first()
     
     
 

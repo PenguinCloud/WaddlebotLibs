@@ -67,7 +67,7 @@ class matterbridge_helpers:
         # Send the message to Matterbridge
         try:
             requests.post(matterbridgePostURL, json=asdict(payload))
-            logging.info("Message sent to Matterbridge successfully.")
+            logging.warning("Message sent to Matterbridge successfully.")
         except Exception as e:
             logging.error(f"Error sending message to Matterbridge: {e}")
 
