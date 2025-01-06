@@ -2,7 +2,9 @@
 from functools import lru_cache
 from pydal import DAL, Field
 from urllib.parse import unquote
+from re import findall
 
+from json import loads as jloads
 from json import load as jload
 from json import dump as jdump
 
@@ -68,7 +70,7 @@ class dbm_helpers:
     def command_exists(self, command: str) -> bool:
         command = self.replace_spaces(command)
 
-        return self.db(self.db.modules.command == command).select().first()
+        return self.db(self.db.module_commands.command_name == command).select().first()
     
     
 
@@ -282,3 +284,49 @@ class dbm_helpers:
         routing_gateway = self.db((self.db.routing_gateways.channel_id == channel_id) & (self.db.routing_gateways.gateway_server == gateway_server.id)).select().first()
 
         return routing_gateway
+    
+    # Function to validate the default given waddlebot payload, and return the payload if it is valid.
+    def validate_waddlebot_payload(self, payload: dict) -> dict:
+        # Check if the payload is given.
+        if not payload:
+            return None
+        
+        # Convert the payload to a dictionary.
+        payload = jloads(payload)
+
+        # Check if the payload has the necessary keys.
+        if "community_name" not in payload or "identity_name" not in payload or "command_string" not in payload:
+            return None
+        
+        # Check if the identity_name, community_name and command_string are not empty.
+        if not payload["community_name"] or not payload["identity_name"] or not payload["command_string"]:
+            return None
+        
+        # Check if the identity_name and community_name are existing identities and communities.
+        identity = self.get_identity(payload["identity_name"])
+        community = self.get_community(payload["community_name"])
+
+        if not identity or not community:
+            return None
+        
+        # Set a new payload with the identity and community objects.
+        payload["identity"] = identity
+        payload["community"] = community
+        payload["command_string"] = self.split_command_string(payload["command_string"])
+        payload["channel_id"] = payload.get("channel_id", None)
+        payload["account"] = payload.get("account", None)
+        
+        # Return the payload.
+        return payload
+    
+    # Function to split a given command string into a list of strings. Each string command value is between [] brackets in the command string.
+    def split_command_string(self, command_string: str) -> list:
+        # Check if the command_string is given.
+        if not command_string:
+            return None
+        
+        # Split the command_string by the [] brackets.
+        command_list = findall(r'\[([^\]]*)\]', command_string)
+        
+        # Return the list of commands.
+        return command_list
