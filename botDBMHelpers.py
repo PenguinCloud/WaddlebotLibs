@@ -11,7 +11,10 @@ from json import dump as jdump
 from requests import request
 
 # Import the necessary classes from the botclasses module
-from WaddlebotLibs.botClasses import role, community, alias_command, module, identity, routing_gateway, text_response
+from .botClasses import role, community, alias_command, module, identity, routing_gateway, text_response
+
+# Import the necessary py4web modules
+from py4web import abort
 
 # Class to initialize the helpers class
 class dbm_helpers:
@@ -289,25 +292,25 @@ class dbm_helpers:
     def validate_waddlebot_payload(self, payload: dict) -> dict:
         # Check if the payload is given.
         if not payload:
-            return None
+            abort(400, "Payload is not given.")
         
         # Convert the payload to a dictionary.
         payload = jloads(payload)
 
         # Check if the payload has the necessary keys.
         if "community_name" not in payload or "identity_name" not in payload or "command_string" not in payload:
-            return None
+            abort(400, "Payload does not have the necessary keys. Please provide the community_name, identity_name and command_string.")
         
         # Check if the identity_name, community_name and command_string are not empty.
         if not payload["community_name"] or not payload["identity_name"] or not payload["command_string"]:
-            return None
+            abort(400, "Please provide a community_name, identity_name and command_string.")
         
         # Check if the identity_name and community_name are existing identities and communities.
         identity = self.get_identity(payload["identity_name"])
         community = self.get_community(payload["community_name"])
 
         if not identity or not community:
-            return None
+            abort(400, "Identity or community does not exist.")
         
         # Set a new payload with the identity and community objects.
         payload["identity"] = identity

@@ -1,7 +1,7 @@
 from pydal import DAL
 
-from WaddlebotLibs.matterbridge_classes import matterbridgePayload
-from WaddlebotLibs.botClasses import prize
+from .matterbridge_classes import matterbridgePayload
+from .botClasses import prize
 
 import logging
 import os
