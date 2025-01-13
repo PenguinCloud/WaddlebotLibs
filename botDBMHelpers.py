@@ -11,10 +11,12 @@ from json import dump as jdump
 from requests import request
 
 # Import the necessary classes from the botclasses module
-from .botClasses import role, community, alias_command, module, identity, routing_gateway, text_response
+from .botClasses import role, community, alias_command, module, identity, routing_gateway, text_response, module_command
 
 # Import the necessary py4web modules
 from py4web import abort
+
+import logging
 
 # Class to initialize the helpers class
 class dbm_helpers:
@@ -290,8 +292,10 @@ class dbm_helpers:
     
     # Function to validate the default given waddlebot payload, and return the payload if it is valid.
     def validate_waddlebot_payload(self, payload: dict) -> dict:
+        logging.info("Validating Waddlebot payload.")
         # Check if the payload is given.
         if not payload:
+            logging.error("Payload is not given.")
             abort(400, "Payload is not given.")
         
         # Convert the payload to a dictionary.
@@ -299,10 +303,12 @@ class dbm_helpers:
 
         # Check if the payload has the necessary keys.
         if "community_name" not in payload or "identity_name" not in payload or "command_string" not in payload:
+            logging.error("Payload does not have the necessary keys. Please provide the community_name, identity_name and command_string.")
             abort(400, "Payload does not have the necessary keys. Please provide the community_name, identity_name and command_string.")
         
         # Check if the identity_name, community_name and command_string are not empty.
         if not payload["community_name"] or not payload["identity_name"] or not payload["command_string"]:
+            logging.error("Please provide a community_name, identity_name and command_string.")
             abort(400, "Please provide a community_name, identity_name and command_string.")
         
         # Check if the identity_name and community_name are existing identities and communities.
@@ -310,12 +316,33 @@ class dbm_helpers:
         community = self.get_community(payload["community_name"])
 
         if not identity or not community:
+            logging.error("Identity or community does not exist.")
             abort(400, "Identity or community does not exist.")
         
+        # Get the command name from the command string.
+        command_name = self.get_command_name(payload["command_string"])
+
+        # Check if the command exists in the module_commands table and return it.
+        command = self.get_module_command(command_name)
+
+        if not command:
+            logging.error("Command does not exist.")
+            abort(400, "Command does not exist.")
+
+        # Check if the number of parameters in the command string is correct.
+        command_params = self.get_command_params(payload["command_string"])
+
+        # If the number of parameters is incorrect, return the description of the command.
+        if not self.check_command_params(command, command_params):
+            description = command.description
+
+            logging.error(description)
+            abort(400, description)
+
         # Set a new payload with the identity and community objects.
         payload["identity"] = identity
         payload["community"] = community
-        payload["command_string"] = self.split_command_string(payload["command_string"])
+        payload["command_string"] = command_params
         payload["channel_id"] = payload.get("channel_id", None)
         payload["account"] = payload.get("account", None)
         
@@ -323,7 +350,7 @@ class dbm_helpers:
         return payload
     
     # Function to split a given command string into a list of strings. Each string command value is between [] brackets in the command string.
-    def split_command_string(self, command_string: str) -> list:
+    def get_command_params(self, command_string: str) -> list:
         # Check if the command_string is given.
         if not command_string:
             return None
@@ -333,3 +360,37 @@ class dbm_helpers:
         
         # Return the list of commands.
         return command_list
+    
+    # Function to get the command name from a given command string.
+    def get_command_name(self, command_string: str) -> str:
+        # Check if the command_string is given.
+        if not command_string:
+            return None
+        
+        # Split the command_string by the [] brackets.
+        command_name = command_string.split(" ")[0]
+        
+        # Return the command name.
+        return command_name
+
+    # Function to get a command from the module_commands table by a given command_name.
+    def get_module_command(self, command_name: str) -> module_command:
+        return self.db(self.db.module_commands.command_name == command_name).select().first()
+    
+    # Function that receives a a command object and a list of parameters and checks whether the number of parameters
+    # corrisponds to the req_param_amount field of the command object.
+    def check_command_params(self, command: module_command, params: list) -> bool:
+        logging.info("Checking command parameters.")
+
+        command_param_amount = command.req_param_amount
+        given_param_amount = len(params)
+
+        logging.info("Command param amount: ")
+        logging.info(command)
+        logging.info("Params: ")
+        logging.info(params)
+
+        if command is None or params is None:
+            return False
+
+        return command_param_amount == given_param_amount

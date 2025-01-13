@@ -43,7 +43,7 @@ class dbquery:
 # ===============================================
 
 @dataclass
-class module_commands:
+class module_command:
     module_id: int
     command_name: str
     action_url: str
@@ -52,6 +52,7 @@ class module_commands:
     request_parameters: list
     payload_keys: list
     req_priv_list: list
+    req_param_amount: int
 
 
 @dataclass
