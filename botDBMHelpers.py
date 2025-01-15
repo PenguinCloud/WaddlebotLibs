@@ -7,6 +7,7 @@ from re import findall
 from json import loads as jloads
 from json import load as jload
 from json import dump as jdump
+from json import dumps as jdumps
 
 from requests import request
 
@@ -293,31 +294,44 @@ class dbm_helpers:
     # Function to validate the default given waddlebot payload, and return the payload if it is valid.
     def validate_waddlebot_payload(self, payload: dict) -> dict:
         logging.info("Validating Waddlebot payload.")
+        # Declare an error payload, containing an error message.
+        error_payload = {
+            "msg": ""
+        }
         # Check if the payload is given.
         if not payload:
+            error_payload["msg"] = "Payload is not given."
             logging.error("Payload is not given.")
-            abort(400, "Payload is not given.")
+            abort(400, jdumps(error_payload))
         
         # Convert the payload to a dictionary.
         payload = jloads(payload)
 
         # Check if the payload has the necessary keys.
         if "community_name" not in payload or "identity_name" not in payload or "command_string" not in payload:
+            error_payload["msg"] = "Payload does not have the necessary keys. Please provide the community_name, identity_name and command_string."
             logging.error("Payload does not have the necessary keys. Please provide the community_name, identity_name and command_string.")
-            abort(400, "Payload does not have the necessary keys. Please provide the community_name, identity_name and command_string.")
+            abort(400, jdumps(error_payload))
         
         # Check if the identity_name, community_name and command_string are not empty.
         if not payload["community_name"] or not payload["identity_name"] or not payload["command_string"]:
+            error_payload["msg"] = "Please provide a community_name, identity_name and command_string."
             logging.error("Please provide a community_name, identity_name and command_string.")
-            abort(400, "Please provide a community_name, identity_name and command_string.")
+            abort(400, jdumps(error_payload))
         
         # Check if the identity_name and community_name are existing identities and communities.
         identity = self.get_identity(payload["identity_name"])
         community = self.get_community(payload["community_name"])
 
-        if not identity or not community:
-            logging.error("Identity or community does not exist.")
-            abort(400, "Identity or community does not exist.")
+        if not identity:
+            error_payload["msg"] = "Identity does not exist."
+            logging.error("Identity does not exist.")
+            abort(400, jdumps(error_payload))
+
+        if not community:
+            error_payload["msg"] = "Community does not exist."
+            logging.error("Community does not exist.")
+            abort(400, jdumps(error_payload))
         
         # Get the command name from the command string.
         command_name = self.get_command_name(payload["command_string"])
@@ -326,8 +340,9 @@ class dbm_helpers:
         command = self.get_module_command(command_name)
 
         if not command:
+            error_payload["msg"] = "Command does not exist."
             logging.error("Command does not exist.")
-            abort(400, "Command does not exist.")
+            abort(400, jdumps(error_payload))
 
         # Check if the number of parameters in the command string is correct.
         command_params = self.get_command_params(payload["command_string"])
@@ -335,9 +350,10 @@ class dbm_helpers:
         # If the number of parameters is incorrect, return the description of the command.
         if not self.check_command_params(command, command_params):
             description = command.description
+            error_payload["msg"] = description
 
             logging.error(description)
-            abort(400, description)
+            abort(400, jdumps(error_payload))
 
         # Set a new payload with the identity and community objects.
         payload["identity"] = identity
