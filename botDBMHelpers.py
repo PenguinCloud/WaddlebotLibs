@@ -142,9 +142,14 @@ class dbm_helpers:
 
     # Help function to get the "Member" role id for a given community.
     def get_member_role_id(self, community_id: int) -> int:
-        return self.db(
-            (self.db.roles.community_id == community_id) & (self.db.roles.name == "Member")
-        ).select(self.db.roles.id).first().id
+        logging.info("Getting the Member role id for the community_id:")
+        logging.info(community_id)
+        
+        role = self.db(
+            (self.db.roles.community_id == community_id) & (self.db.roles.name == "Member")).select(self.db.roles.id).first()
+        if not role:
+            return None
+        return role.id
 
     # A helper function that uses the community and an identity to retrieve the identity's role in the community.
     def get_identity_role_in_community(self, identity_name: str, community_name: str) -> role:
