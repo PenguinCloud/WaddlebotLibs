@@ -1,23 +1,26 @@
 import logging
 
 # Usage Example: 
-# mylog = botLogger.BotLogger()
-# mylog.fileLogger("bot.log")
-# mylog.info("This is a test message")
+# from botLogger import BotLogger       # This will import the BotLogger class
+# mylog = BotLogger(logFile="bot.log")  # This will create a logger with the name WaddleBot and logfile to bot.log
+# mylog.fileLogger()                    # This will create a file handler for the logger, defaults to console
+# log = mylog.logger                    # This will get the logger object with both file and console handler now
+# log.info("This is a test message")    # This will log the message to the file
 
 # ---------------------
 # This is a class which will handle all logging for the bot
 # ---------------------
 class BotLogger:
-    def __init__(self, logname: str = "WaddleBot"):
+    def __init__(self, logname: str = "WaddleBot", logFile: str = "/var/log/waddlebot.log"):
         self.logger = logging.getLogger(logname)
         self.logger.setLevel(logging.INFO)
         self.callFunction = self.caller()
+        self.logFile = logFile
     
     # ---------------------
     # This is a function which will set the handler name to the caller function
     # ---------------------
-    def caller(self):
+    def caller(self) -> None:
         from inspect import stack
         try:
             self.callFunction = stack()[2][3]
@@ -29,8 +32,8 @@ class BotLogger:
     # ---------------------
     # This is a function which will create a logger using file handler
     # ---------------------
-    def fileLogger(self, file):
-        file_handler = logging.FileHandler(file)
+    def fileLogger(self):
+        file_handler = logging.FileHandler(self.logFile)
         file_handler.setLevel(logging.INFO)
         file_handler.setFormatter(
             logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
@@ -49,8 +52,8 @@ class BotLogger:
     # ---------------------
     # This is a function which will create a logger using file handler with JSON format
     # ---------------------
-    def fileJSONLogger(self, file: str='log.json'):
-        json_handler = logging.FileHandler(file)
+    def fileJSONLogger(self):
+        json_handler = logging.FileHandler(self.logFile)
         json_handler.setLevel(logging.INFO)
         json_handler.setFormatter(
             logging.Formatter('{"function": "%(name)s", "level": "%(levelname)s", "rawMsg": "%(message)s"}'))
