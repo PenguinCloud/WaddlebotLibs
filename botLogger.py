@@ -11,11 +11,14 @@ import logging
 # This is a class which will handle all logging for the bot
 # ---------------------
 class BotLogger:
-    def __init__(self, logname: str = "WaddleBot", logFile: str = "/var/log/waddlebot.log"):
+    def __init__(self, logname: str = "WaddleBot", logFile: str = "/var/log/waddlebot.log", 
+                 logHost: str ="127.0.0.1:514", json = False) -> None:
         self.logger = logging.getLogger(logname)
         self.logger.setLevel(logging.INFO)
         self.callFunction = self.caller()
         self.logFile = logFile
+        self.logHost = logHost
+        self.jsonFormat = json
     
     # ---------------------
     # This is a function which will set the handler name to the caller function
@@ -32,51 +35,55 @@ class BotLogger:
     # ---------------------
     # This is a function which will create a logger using file handler
     # ---------------------
-    def fileLogger(self):
+    def fileLogger(self) -> None:
         file_handler = logging.FileHandler(self.logFile)
         file_handler.setLevel(logging.INFO)
-        file_handler.setFormatter(
-            logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+        if self.jsonFormat:
+            file_handler.setFormatter(
+                logging.Formatter('{"function": "%(name)s", "level": "%(levelname)s", "rawMsg": "%(message)s"}'))
+        else:
+            file_handler.setFormatter(
+                logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         self.logger.addHandler(file_handler)
     
     # ---------------------
     # This is a function which will create a logger using syslog handler
     # ---------------------
-    def syslogLogger(self):
+    def syslogLogger(self) -> None:
         syslog_handler = logging.handlers.SysLogHandler(address='/dev/log')
         syslog_handler.setLevel(logging.INFO)
-        syslog_handler.setFormatter(
-            logging.Formatter('%(name)s - %(levelname)s - %(message)s'))
+        if self.jsonFormat:
+            syslog_handler.setFormatter(
+                logging.Formatter('{"function": "%(name)s", "level": "%(levelname)s", "rawMsg": "%(message)s"}'))
+        else:
+            syslog_handler.setFormatter(
+                logging.Formatter('%(name)s - %(levelname)s - %(message)s'))
         self.logger.addHandler(syslog_handler)
     
     # ---------------------
     # This is a function which will create a logger using file handler with JSON format
     # ---------------------
-    def fileJSONLogger(self):
-        json_handler = logging.FileHandler(self.logFile)
-        json_handler.setLevel(logging.INFO)
-        json_handler.setFormatter(
-            logging.Formatter('{"function": "%(name)s", "level": "%(levelname)s", "rawMsg": "%(message)s"}'))
-        self.logger.addHandler(json_handler)
-        
+    def fileJSONLogger(self) -> None:
+        self.jsonFormat = True
+        self.fileLogger()
     # ---------------------
     # this is a functin which will change the logging level
     # ---------------------
-    def changeLevel(self, level):
+    def changeLevel(self, level) -> None:
         self.logger.setLevel(level)
 
 
     # ---------------------
     # Redirect call for info
     # ---------------------
-    def info(self, msg: str):
+    def info(self, msg: str) -> None:
         self.caller()
         self.logger.info(f"{self.callFunction} - {msg}")
         
     # ---------------------
     # Redirect call for error
     # ---------------------
-    def error(self, msg: str):
+    def error(self, msg: str) -> None:
         self.caller()
         self.logger.error(f"{self.callFunction} - {msg}")
         
@@ -90,15 +97,29 @@ class BotLogger:
     # ---------------------
     # Redirect call for warning
     # ---------------------
-    def warning(self, msg: str):
+    def warning(self, msg: str) -> None:
         self.caller()
         self.logger.warning(f"{self.callFunction} - {msg}")
     
     # ---------------------
     # Redirect call for critical
     # ---------------------
-    def critical(self, msg: str):
+    def critical(self, msg: str) -> None:
         from sys import exit
         self.caller()
         self.logger.critical(f"{self.callFunction} - {msg}")
         exit((f"{self.callFunction} - {msg}", 1))
+        
+    # ---------------------
+    # Redirect call for exception
+    # ---------------------
+    def exception(self, msg: str) -> None:
+        self.caller()
+        self.logger.exception(f"{self.callFunction} - {msg}")
+        
+    # ---------------------
+    # Create a syslog handler with json format
+    # ---------------------
+    def syslogJSONLogger(self) -> None:
+        self.jsonFormat = True
+        self.syslogLogger()
