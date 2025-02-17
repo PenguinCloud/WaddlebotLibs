@@ -64,3 +64,41 @@ class BotLogger:
     # ---------------------
     def changeLevel(self, level):
         self.logger.setLevel(level)
+
+
+    # ---------------------
+    # Redirect call for info
+    # ---------------------
+    def info(self, msg: str):
+        self.caller()
+        self.logger.info(f"{self.callFunction} - {msg}")
+        
+    # ---------------------
+    # Redirect call for error
+    # ---------------------
+    def error(self, msg: str):
+        self.caller()
+        self.logger.error(f"{self.callFunction} - {msg}")
+        
+    # ---------------------
+    # Redirect call for debug
+    # ---------------------
+    def debug(self, msg: str):
+        self.caller()
+        self.logger.debug(f"{self.callFunction} - {msg}")
+    
+    # ---------------------
+    # Redirect call for warning
+    # ---------------------
+    def warning(self, msg: str):
+        self.caller()
+        self.logger.warning(f"{self.callFunction} - {msg}")
+    
+    # ---------------------
+    # Redirect call for critical
+    # ---------------------
+    def critical(self, msg: str):
+        from sys import exit
+        self.caller()
+        self.logger.critical(f"{self.callFunction} - {msg}")
+        exit((f"{self.callFunction} - {msg}", 1))
