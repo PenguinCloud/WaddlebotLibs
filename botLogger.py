@@ -3,9 +3,10 @@ import logging
 # Usage Example: 
 # from botLogger import BotLogger       # This will import the BotLogger class
 # mylog = BotLogger(logFile="bot.log")  # This will create a logger with the name WaddleBot and logfile to bot.log
-# mylog.fileLogger()                    # This will create a file handler for the logger, defaults to console
-# log = mylog.logger                    # This will get the logger object with both file and console handler now
-# log.info("This is a test message")    # This will log the message to the file
+# mylog.fileLogger()                    # This will create an optional file handler for the logger, defaults to console
+# mylog.info("This is a test message")  # This will log the message to the file through redirect
+# log = mylog.logger                    # This will get the logger object directly
+# log.info("This is a test message")    # This will log the message to the file directly
 
 # ---------------------
 # This is a class which will handle all logging for the bot
